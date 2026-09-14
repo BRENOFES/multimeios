@@ -24,15 +24,13 @@ Os três bancos ficam no mesmo servidor MySQL. O MySQL mantém as chaves estrang
 
 Pré-requisitos: Python 3.12+, MySQL 8 e, opcionalmente, Docker.
 
-```bash
+Na raiz do projeto, copie `.env.example` para `.env`, defina uma senha local para o MySQL e inicie o banco:
+
+```powershell
+Copy-Item .env.example .env
 docker compose up -d mysql
 cd backend
 python -m venv .venv
-```
-
-No Windows:
-
-```powershell
 .venv\Scripts\activate
 pip install -r requirements.txt
 Copy-Item .env.example .env
@@ -40,9 +38,13 @@ python manage.py criar_admin --nome "Equipe Multimeios" --usuario admin
 python manage.py runserver
 ```
 
-No Linux/macOS:
+No Linux/macOS, substitua os comandos de cópia/ativação por:
 
 ```bash
+cp .env.example .env
+docker compose up -d mysql
+cd backend
+python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
@@ -50,7 +52,9 @@ python manage.py criar_admin --nome "Equipe Multimeios" --usuario admin
 python manage.py runserver
 ```
 
-O comando `criar_admin` pede a senha sem exibi-la e salva somente o hash.
+No arquivo `backend/.env`, coloque em `DB_PASSWORD` a mesma senha definida em `MYSQL_ROOT_PASSWORD` no `.env` da raiz. O comando `criar_admin` pede a senha sem exibi-la e salva somente o hash.
+
+Os scripts automáticos do Docker são executados apenas quando o volume MySQL é criado pela primeira vez. Não apague um volume com dados importantes sem backup.
 
 ## API inicial
 
