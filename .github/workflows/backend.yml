@@ -1,0 +1,44 @@
+name: Validar backend Django
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Dependências do MySQL
+        run: sudo apt-get update && sudo apt-get install -y default-libmysqlclient-dev pkg-config
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+      - name: Validar sintaxe
+        run: python -m compileall .
+      - name: Testar regras de negócio
+        run: python -m unittest discover -s tests
+      - name: Validar configuração Django
+        shell: bash
+        run: |
+          export DJANGO_SECRET_KEY="$(python -c 'import secrets; print(secrets.token_urlsafe(50))')"
+          export DJANGO_DEBUG="False"
+          export DJANGO_ALLOWED_HOSTS="localhost"
+          export DB_HOST="127.0.0.1"
+          export DB_PORT="3306"
+          export DB_USER="ci"
+          export DB_PASSWORD="$(python -c 'import secrets; print(secrets.token_urlsafe(24))')"
+          export DB_USUARIOS_NAME="usuarios"
+          export DB_ADMIN_NAME="admin"
+          export DB_LIVROS_NAME="livros"
+          python manage.py check
